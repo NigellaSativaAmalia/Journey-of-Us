@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>The Journey of Us</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(to bottom, #fff7f2, #ffeef5);
+  text-align: center;
+  overflow-x: hidden;
+}
+
+h1 {
+  margin-top: 40px;
+  font-size: 36px;
+}
+
+.subtitle {
+  margin-top: 10px;
+  color: #666;
+  font-size: 18px;
+}
+
+.garden {
+  margin: 40px auto;
+  max-width: 900px;
+  background: #ffffff;
+  padding: 30px;
+  border-radius: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+  gap: 15px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+  position: relative;
+  z-index: 2;
+}
+
+/* setiap bunga (sama semua) */
+.flower {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border-radius: 8px;
+  background: transparent;
+}
+
+/* emoji */
+.flower > .emoji {
+  font-size: 36px;
+  opacity: 0;
+  transform: scale(0.3);
+  animation: bloom 0.6s ease forwards;
+}
+
+/* tanggal di bawah bunga */
+.date {
+  font-size: 12px;
+  color: #777;
+  margin-top: 6px;
+  opacity: 0;
+  transform: translateY(6px);
+  animation: showDate 0.6s ease forwards;
+}
+
+@keyframes bloom {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes showDate {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+</style>
+</head>
+
+<body>
+
+<h1>The Journey of Us 🌸</h1>
+<div class="subtitle" id="counter"></div>
+
+<div class="garden" id="garden"></div>
+
+<script>
+// Rentang tanggal yang ditetapkan (UTC)
+const startDate = new Date(Date.UTC(2025, 0, 20)); // 20 Januari 2025
+const endDate   = new Date(Date.UTC(2026, 1, 3));  // 3 Februari 2026
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+function daysBetweenInclusiveUTC(start, end) {
+  const utcStart = Date.UTC(start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate());
+  const utcEnd = Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate());
+  const diffDays = Math.floor((utcEnd - utcStart) / MS_PER_DAY);
+  return Math.max(diffDays + 1, 0); // +1 untuk inklusif
+}
+
+const totalDays = daysBetweenInclusiveUTC(startDate, endDate);
+
+const garden = document.getElementById("garden");
+const counter = document.getElementById("counter");
+
+const monthNames = [
+  "Januari","Februari","Maret","April","Mei","Juni",
+  "Juli","Agustus","September","Oktober","November","Desember"
+];
+
+function formatDateUTC(d) {
+  const day = d.getUTCDate();
+  const month = monthNames[d.getUTCMonth()];
+  const year = d.getUTCFullYear();
+  return `${day} ${month} ${year}`;
+}
+
+if (totalDays === 0) {
+  counter.innerHTML = `Rentang tanggal tidak valid atau tidak ada hari dalam rentang.`;
+} else {
+  counter.innerHTML = `Dari ${formatDateUTC(startDate)} sampai ${formatDateUTC(endDate)} — <strong>${totalDays}</strong> bunga 🌹`;
+  // buat bunga satu per hari dari startDate hingga endDate (inklusif)
+  let index = 0;
+  function growFlowerStep() {
+    if (index >= totalDays) return;
+
+    const utcStart = Date.UTC(startDate.getUTCFullYear(), startDate.getUTCMonth(), startDate.getUTCDate());
+    const flowerUtc = utcStart + index * MS_PER_DAY;
+    const flowerDate = new Date(flowerUtc);
+
+    const dateStr = formatDateUTC(flowerDate);
+
+    const flower = document.createElement("div");
+    flower.className = "flower";
+    flower.innerHTML = `<div class="emoji" aria-hidden="true">🌹</div><div class="date">${dateStr}</div>`;
+    flower.title = dateStr;
+
+    garden.appendChild(flower);
+    index++;
+
+    // jeda kecil supaya muncul bertahap; ubah nilai jika ingin lebih cepat/lambat
+    setTimeout(growFlowerStep, 30);
+  }
+
+  growFlowerStep();
+}
+</script>
+
+</body>
+</html>
